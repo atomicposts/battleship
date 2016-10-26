@@ -5,7 +5,17 @@ describe('Given a start view tha has a single button', function () {
 
         beforeEach(function () {
             browser.get('/');
-            expect(startView.isPresent().toBeTruthy());
+            expect(startView.isPresent()).toBeTruthy();
+            var buttonToStart = element(by.linkText('Start game'));
+            buttonToStart.click();
         });
+
+        it('should be switched setupView',function(){
+            expect(setupView.isPresent()).toBeTruthy();
+        })
+        it('should not display startView',function(){
+            expect(startView.isPresent()).toBeFalsy();
+        })
+
     });
 })

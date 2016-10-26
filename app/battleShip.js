@@ -1,12 +1,12 @@
-var battleShip = angular.module('battleShip', ['ng-route']);
+var battleShip = angular.module('battleShip', ['ngRoute']);
 
-battleShip.config(['$routerProvider', function ($routerProvider){
-    $routerProvider
+battleShip.config(['$routeProvider', function ($routeProvider){
+    $routeProvider
     .when('/start', {
         templateUrl : 'app/start.html',
         controller: 'StartController'
     })
-    .when('/game', {
+    .when('/setup', {
         templateUrl : 'app/setup.html',
         controller: 'SetupController'
     })
