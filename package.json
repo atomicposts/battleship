@@ -1,0 +1,26 @@
+{
+  "name": "battleship",
+  "version": "1.0.0",
+  "description": "Battleship game",
+  "main": "index.html",
+  "scripts": {
+    "start": "http-server -a localhost -p 8000"
+  },
+  "keywords": [
+    "Angular",
+    "JS",
+    "TDD"
+  ],
+  "author": "Galan",
+  "license": "MIT",
+  "devDependencies": {
+    "bower": "^1.7.9",
+    "http-server": "^0.9.0",
+    "jasmine-core": "^2.5.2",
+    "karma": "^1.3.0",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-jasmine": "^1.0.2",
+    "karma-phantomjs-launcher": "^1.0.2",
+    "protractor": "^4.0.9"
+  }
+}

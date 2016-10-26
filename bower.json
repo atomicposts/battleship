@@ -1,0 +1,22 @@
+{
+  "name": "battleship",
+  "description": "Battleship game",
+  "main": "index.html",
+  "authors": [
+    "Galan"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "Angular",
+    "JS",
+    "TDD"
+  ],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
