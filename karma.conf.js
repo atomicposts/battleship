@@ -7,8 +7,9 @@ module.exports = function(config) {
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
 
+    plugins : ['karma-jasmine', 'karma-phantomjs-launcher'],
 
-    // frameworks to use
+      // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     frameworks: ['jasmine'],
 
@@ -16,11 +17,11 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
         'bower_components/angular/angular.js',
+        'bower_components/angular-route/angular-route.js',
         'bower_components/angular-mocks/angular-mocks.js',
         'app/**/*.js',
         'spec/**/*.js'
     ],
-
 
     // list of files to exclude
     exclude: [
@@ -40,7 +41,7 @@ module.exports = function(config) {
 
 
     // web server port
-    port: 9876,
+    port: 8000,
 
 
     // enable / disable colors in the output (reporters and logs)
@@ -49,7 +50,7 @@ module.exports = function(config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_DEBUG,
 
 
     // enable / disable watching file and executing tests whenever any file changes
@@ -67,6 +68,9 @@ module.exports = function(config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity
+    concurrency: Infinity,
+    client: {
+        captureConsole: true
+    }
   })
 }

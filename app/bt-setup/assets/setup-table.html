@@ -1,0 +1,25 @@
+
+<table class="table table-bordered">
+  <tbody>
+    <tr class="row-{{ $index }}" ng-repeat="row in ctrl.setupTable track by $index">
+         <td class="col-{{ $index }}" ng-repeat="cell in row track by $index">
+             {{ cell }}
+         </td>
+     </tr>
+  </tbody>
+</table>
+
+<fieldset>
+    {{ ctrl.verticalOrientation }}
+    <legend>Position</legend>
+    <div class="radio">
+        <label>
+            <input ng-model="ctrl.verticalOrientation" type="radio" name="optionsRadios" id="horizontalRadios" ng-value="true">
+            Horizontal
+        </label>
+        <label>
+            <input ng-model="ctrl.verticalOrientation" type="radio" name="optionsRadios" id="verticalRadios" ng-value="false">
+            Vertical
+        </label>
+    </div>
+</fieldset>

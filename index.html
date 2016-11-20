@@ -1,18 +1,14 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title></title>
+        <title>Battleship</title>
+        <link type="text/css" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     </head>
     <body ng-app='battleShip'>
-        <h1>Battleship game</h1>
-        <div ng-view>
-
+        <br>
+        <div class="container">
+            <div ng-view></div>
         </div>
-
-        <script type="text/javascript" src="bower_components/angular/angular.js"></script>
-        <script src="bower_components/angular-route/angular-route.js"></script>
-        <script type="text/javascript" src="app/battleShip.js"></script>
-        <script type="text/javascript" src="app/startController.js"></script>
-        <script type="text/javascript" src="app/setupController.js"></script>
+        <script type="text/javascript" src="dist/battleship.js"></script>
     </body>
 </html>
