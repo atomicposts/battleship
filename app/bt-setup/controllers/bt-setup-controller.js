@@ -1,6 +1,6 @@
 (function(){
     angular.module('battleShip')
-        .controller('SetupController', function () {
+        .controller('SetupController', ['table', '$rootScope', function (table, $rootScope) {
             var vm = this;
 
             vm.ships = [{
@@ -19,8 +19,20 @@
             ];
 
             vm.horizontal = true;
-            vm.shipSelected = vm.ships[0];
 
-        });
+            //Event
+            vm.selectShip = function (ship) {
+                vm.shipSelected = ship;
+                $rootScope.$broadcast('SELECT_SHIP', ship);
+            };
+
+            initialize();
+
+            function initialize() {
+                vm.shipSelected = vm.ships[0];
+                $rootScope.$broadcast('SELECT_SHIP', vm.shipSelected);
+            }
+
+        }]);
 })();
 

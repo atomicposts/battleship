@@ -11,7 +11,12 @@
                 .when('/setup', {
                     templateUrl: 'app/setup.html',
                     controller: 'SetupController',
-                    controllerAs: 'vmS'
+                    controllerAs: 'vmS',
+                    resolve: {
+                        table : ['SetupTableService', function (SetupTableService) {
+                            return SetupTableService.getInitialTable();
+                        }]
+                    }
                 })
                 .otherwise({
                     redirectTo: '/start'

@@ -29,14 +29,13 @@ describe('Setup Table Get Service test', function () {
 
         it('result should be returned', function (done) {
             inject(function($rootScope) {
-                setupTableGetService.getTable().then(function (responseData) {
+                setupTableGetService.getTable(2, 3).then(function (responseData) {
                     expect(responseData).toEqual('promise');
                     done();
                 });
                 $rootScope.$digest(); // To make a digest cycle
             });
-
-        })
+        });
     });
 
     describe('when SetupTableProxy rejects the promise', function () {
@@ -52,7 +51,7 @@ describe('Setup Table Get Service test', function () {
 
         it('result should be an error', function (done) {
             inject(function ($rootScope) {
-                setupTableGetService.getTable().then(function(response) {
+                setupTableGetService.getTable(2, 3).then(function(response) {
                 }, function (responseError) {
                     expect(responseError).toEqual('error');
                     done();
@@ -60,7 +59,7 @@ describe('Setup Table Get Service test', function () {
 
                 $rootScope.$digest();
             });
-        })
-    })
+        });
+    });
 
 });

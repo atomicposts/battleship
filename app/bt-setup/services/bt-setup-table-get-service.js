@@ -10,10 +10,10 @@
             self.getTable = getTable;
 
 
-            function getTable() {
+            function getTable(width, height) {
                 var deferred = $q.defer();
 
-                SetupTableProxy.getTable(4, 4).then(getTableSuccess, getTableError);
+                SetupTableProxy.getTable(width, height).then(getTableSuccess, getTableError);
 
                 function getTableSuccess(table) {
                     deferred.resolve(table);

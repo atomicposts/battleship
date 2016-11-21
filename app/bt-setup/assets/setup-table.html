@@ -2,23 +2,22 @@
 <table class="table table-bordered">
   <tbody>
     <tr class="row-{{ $index }}" ng-repeat="row in ctrl.setupTable track by $index">
-         <td class="col-{{ $index }}" ng-repeat="cell in row track by $index">
-             {{ cell }}
+         <td class="col-{{ $index }} {{cell.class}}" ng-repeat="cell in row track by $index">
+             {{ cell.value }}
          </td>
      </tr>
   </tbody>
 </table>
 
 <fieldset>
-    {{ ctrl.verticalOrientation }}
     <legend>Position</legend>
     <div class="radio">
         <label>
-            <input ng-model="ctrl.verticalOrientation" type="radio" name="optionsRadios" id="horizontalRadios" ng-value="true">
+            <input ng-model="ctrl.verticalOrientation" type="radio" id="horizontalRadios" value="false">
             Horizontal
         </label>
         <label>
-            <input ng-model="ctrl.verticalOrientation" type="radio" name="optionsRadios" id="verticalRadios" ng-value="false">
+            <input ng-model="ctrl.verticalOrientation" type="radio" id="verticalRadios" value="true">
             Vertical
         </label>
     </div>

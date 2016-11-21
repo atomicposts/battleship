@@ -43067,7 +43067,12 @@ function ngViewFillContentFactory($compile, $controller, $route) {
                 .when('/setup', {
                     templateUrl: 'app/setup.html',
                     controller: 'SetupController',
-                    controllerAs: 'vmS'
+                    controllerAs: 'vmS',
+                    resolve: {
+                        table : ['SetupTableService', function (SetupTableService) {
+                            return SetupTableService.getInitialTable();
+                        }]
+                    }
                 })
                 .otherwise({
                     redirectTo: '/start'
@@ -43075,32 +43080,27 @@ function ngViewFillContentFactory($compile, $controller, $route) {
         }]);
 }) ();
 
-;(function() {
-    "use strict";
-    angular.module('battleShip')
-        .controller('SetupController', function () {
-
-        });
-})();
-
-
 ;(function () {
     angular.module('battleShip')
-        .controller('SetupControllerDirective', [ 'SetupTableService' , function (SetupTableService) {
-
+        .controller('SetupControllerDirective', [ '$rootScope', 'SetupTableService', 'SetupTableCheckService' , function ($rootScope, SetupTableService, SetupTableCheckService) {
             var vm = this;
 
-            SetupTableService.initialize(vm.width, vm.height);
-            vm.setupTable = SetupTableService.getTable();
+            vm.setupTable = [];
+            vm.selectedShip = null;
+            vm.setupTable  = SetupTableService.getTable();
 
-            vm.selectedShip = { id: 1, length: 3, status: 'init' };
-
-            vm.verticalOrientation = false;
+            vm.selectedShip = null;
+            vm.verticalOrientation = 'false';
 
             vm.checkSetupShip = checkSetupShip;
 
+            // Event capture for ship selected
+            $rootScope.$on('SELECT_SHIP', function(event, ship) {
+                vm.selectedShip = ship;
+            });
+
             function checkSetupShip(row, column) {
-                return SetupTableService.checkShip(row, column, vm.selectedShip.length, vm.verticalOrientation);
+                return SetupTableCheckService.checkShip(vm.setupTable, row, column, vm.selectedShip.length, vm.verticalOrientation);
             }
 
         }]);
@@ -43109,7 +43109,7 @@ function ngViewFillContentFactory($compile, $controller, $route) {
 
 ;(function(){
     angular.module('battleShip')
-        .controller('SetupController', function () {
+        .controller('SetupController', ['table', '$rootScope', function (table, $rootScope) {
             var vm = this;
 
             vm.ships = [{
@@ -43128,16 +43128,29 @@ function ngViewFillContentFactory($compile, $controller, $route) {
             ];
 
             vm.horizontal = true;
-            vm.shipSelected = vm.ships[0];
 
-        });
+            //Event
+            vm.selectShip = function (ship) {
+                vm.shipSelected = ship;
+                $rootScope.$broadcast('SELECT_SHIP', ship);
+            };
+
+            initialize();
+
+            function initialize() {
+                vm.shipSelected = vm.ships[0];
+                $rootScope.$broadcast('SELECT_SHIP', vm.shipSelected);
+            }
+
+
+        }]);
 })();
 
 ;(function () {
     "use strict";
 
     angular.module('battleShip')
-        .directive('setupTableDirective', function ($timeout) {
+        .directive('setupTableDirective', function ($compile, $timeout, SetupTableService) {
             return {
                 restrict: 'E',
                 templateUrl: 'app/bt-setup/assets/setup-table.html',
@@ -43149,22 +43162,24 @@ function ngViewFillContentFactory($compile, $controller, $route) {
                     height: '@'
                 },
                 link: function (scope, elem, attrs, ctrl) {
-                    if (ctrl.selectedShip) {
-                        $timeout(function () { //We use timeout to run after a digest
-                            var cells = elem.find('td');
 
-                            cells.bind("click", function () {      // Binding
+                    $timeout(function () { //We use timeout to run after a digest
+                        var cells = elem.find('td');
+
+                        cells.bind("click", function () {      // Binding
+                            if (ctrl.selectedShip) {
                                 var column = $(this).parent().children().index(this);
                                 var row = $(this).parent().parent().children().index(this.parentNode);
-                                //console.log("column: " + column + " row: " + row);
                                 if (ctrl.checkSetupShip(row, column) === false) {
-                                    alert("no posible");
+                                    alert("Imposible");
                                 } else {
-                                    // We call service to set ship
+                                    alert("Posible");
                                 }
-                            });
+                            }
+                        });
 
-                            cells.bind("mouseover", function () {
+                        cells.bind("mouseover", function () {
+                            if (ctrl.selectedShip) {
                                 elem.find('tr').removeClass('danger');
                                 elem.find('tr').removeClass('success');
                                 elem.find('td').removeClass('danger');
@@ -43172,26 +43187,24 @@ function ngViewFillContentFactory($compile, $controller, $route) {
                                 var columnNumber = $(this).parent().children().index(this);
                                 var rowNumber = $(this).parent().parent().children().index(this.parentNode);
                                 var row = $(this).parent();
-                                console.log(ctrl.verticalOrientation);
 
                                 if (ctrl.checkSetupShip(rowNumber, columnNumber) === false) {
-                                    if (ctrl.verticalOrientation === false) {
+                                    if (ctrl.verticalOrientation === 'false') {
                                         $(elem).find('.row-' + rowNumber).addClass('danger');
                                     } else {
                                         $(elem).find('.col-' + columnNumber).addClass('danger');
                                     }
                                 } else {
-                                    if (ctrl.verticalOrientation === false) {
+                                    if (ctrl.verticalOrientation === 'false') {
                                         $(elem).find('.row-' + rowNumber).addClass('success');
                                     } else {
                                         $(elem).find('.col-' + columnNumber).addClass('success');
                                     }
                                 }
-                            });
-
-
+                            }
                         });
-                    }
+
+                    });
                 }
             };
         });
@@ -43204,13 +43217,11 @@ function ngViewFillContentFactory($compile, $controller, $route) {
         .factory('SetupTableProxy', ['$http', '$q', function ($http, $q) {
             var service = {
                 getTable: getTable
-            }; 
+            };
 
             return service;
 
-
             function getTable(width, height) {
-                console.log("entro");
                 var config = {
                     headers: {
                         'Accept': 'application/json',
@@ -43218,7 +43229,7 @@ function ngViewFillContentFactory($compile, $controller, $route) {
                     }
                 };
 
-                return $http.get('table.json', config)
+                return $http.get('/table.json', config)
                     .then(getTableSuccess, getTableFailed);
 
                 function getTableSuccess(response) {
@@ -43238,85 +43249,72 @@ function ngViewFillContentFactory($compile, $controller, $route) {
     'use strict';
 
     angular.module('battleShip')
-        .service('SetupTableService', [ function() {
+        .service('SetupTableCheckService', [ function() {
 
-            var table = [];
-            var width;
-            var height;
+            var self = this;
+
+            self.width = 0;
+            self.height = 0;
 
             return {
-                initialize : initialize,
-                checkShip: checkShip,
-                getTable: getTable
+                checkShip: checkShip
             };
 
-            function initialize(_width, _height) {
-                width = parseInt(_width);
-                height = parseInt(_height);
+            function checkShip(table, row, column, shipLength, vertical) {
 
-                for (var i = 0; i < height; i++) {
-                    table[i] = [];
-                    for (var j = 0; j < width; j++) {
-                        table[i][j] = 0;
-                    }
-                }
-            }
+                self.height = table.length;
+                self.width = table[0].length;
 
-            function getTable() {
-                return table;
-            }
-
-            function checkShip(row, column, shipLength, horizontal) {
-                if (horizontal === true) {
-                    return checkShipHorizontal(row, column, shipLength);
+                if (vertical !== 'true') {
+                    return checkShipHorizontal(table, row, column, shipLength);
                 } else {
-                    return checkShipVertical(row, column, shipLength);
+                    return checkShipVertical(table, row, column, shipLength);
                 }
             }
 
-            function checkShipHorizontal(row, column, shipLength) {
+            function checkShipHorizontal(table, row, column, shipLength) {
 
-                if ((column + shipLength) > width) {
+                if ((column + shipLength) > self.width) {
                     return false;
                 }
 
                 var xMinLimit = (column === 0) ? 0 : column - 1;
-                var xMaxLimit = ((column + shipLength) === width) ? width - 1 : column + shipLength + 1;
+                var xMaxLimit = ((column + shipLength) === self.width) ? self.width - 1 : column + shipLength + 1;
 
                 for ( var i = xMinLimit; i < xMaxLimit; i++) {
-                    if (table[i][row] !== 0) {
+                    if (table[i][row].value !== 0) {
                         return false;
                     }
 
-                    if (row > 0 && (table[i][row -1] !== 0)) {
+                    if (row > 0 && (table[i][row -1].value !== 0)) {
                         return false;
                     }
 
-                    if (row < height - 1 && (table[i][row + 1] !== 0)) {
+                    if (row < self.height - 1 && (table[i][row + 1].value !== 0)) {
                         return false;
                     }
                 }
             }
 
-            function checkShipVertical(row, column, shipLength) {
+            function checkShipVertical(table, row, column, shipLength) {
 
-                if ((row + shipLength) > width) {
+                if ((row + shipLength) > self.width) {
                     return false;
                 }
 
                 var yMinLimit = (row === 0) ? 0 : row - 1;
-                var yMaxLimit = ((row + shipLength) === height) ? height - 1 : row + shipLength + 1;
+                var yMaxLimit = ((row + shipLength) === self.height) ? self.height - 1 : row + shipLength + 1;
 
                 for ( var i = yMinLimit; i < yMaxLimit; i++) {
-                    if (table[column][i] !== 0) {
+                    if (table[column][i].value !== 0) {
                         return false;
                     }
 
-                    if (column > 0 && (table[column - 1][i] !== 0)) {
+                    if (column > 0 && (table[column - 1][i].value !== 0)) {
                         return false;
                     }
 
-                    if (column < width - 2 && (table[column + 1][i] !== 0)) {
+                    if (column < self.width - 2 && (table[column + 1][i].value !== 0)) {
                         return false;
                     }
                 }
@@ -43325,10 +43323,117 @@ function ngViewFillContentFactory($compile, $controller, $route) {
 
         }]);
 })();;(function () {
+    'use strict';
+
+    angular
+        .module('battleShip')
+        .service('SetupTableGetService', [ 'SetupTableProxy', '$q', function(SetupTableProxy, $q) {
+
+            var self = this;
+
+            self.getTable = getTable;
+
+
+            function getTable(width, height) {
+                var deferred = $q.defer();
+
+                SetupTableProxy.getTable(width, height).then(getTableSuccess, getTableError);
+
+                function getTableSuccess(table) {
+                    deferred.resolve(table);
+                }
+
+                function getTableError(error) {
+                    deferred.reject(error);
+                    // We can call an error service like modals, toasts...
+                }
+
+                return deferred.promise;
+
+            }
+        }]);
+})();;(function () {
+    'use strict';
+
+    angular.module('battleShip')
+        .service('SetupTableService', ['$q', 'SetupTableGetService', 'SetupTableTransformer', function($q, SetupTableGetService, SetupTableTransformer) {
+
+            var self= this;
+            self.getInitialTable = getInitialTable;
+            self.getTable = getTable;
+            var table = [];
+
+            function getInitialTable(width, height) {
+                var deferred = $q.defer();
+
+                SetupTableGetService.getTable(width, height).then(getTableSuccess, getTableError);
+
+                return deferred.promise;
+
+                function getTableSuccess(data) {
+                    var transformedInfo = SetupTableTransformer.transform(data);
+                    table = transformedInfo;
+                    deferred.resolve(transformedInfo);
+                }
+
+                function getTableError(responseError) {
+                    deferred.reject(responseError);
+                }
+            }
+
+            function getTable() {
+                return table;
+            }
+        }]);
+})();;(function () {
+    'use strict';
+
+    angular
+        .module('battleShip')
+        .factory('SetupTableTransformer', [function () {
+            var service = {
+                transform : transformResult
+            };
+
+            return service;
+
+            function transformResult (result) {
+                var resultTransformed = [];
+
+                for ( var i = 0, maxHeight = result.length; i < maxHeight; i++ ) {
+                    var row = [];
+                    for (var j = 0, maxWidth = result[i].length; j < maxWidth; j++) {
+                        row.push(createCell(result[i][j]));
+                    }
+                    resultTransformed.push(row);
+                }
+
+                return resultTransformed;
+            }
+
+            function createCell(value) {
+                var cell = { value: value };
+
+                switch (value) {
+                    case 0:
+                        cell.class = 'water';
+                        break;
+                    case -1:
+                        cell.class = 'touch';
+                        break;
+                    default:
+                        cell.class = 'ship';
+                        break;
+                }
+
+                return cell;
+            }
+
+        }]);
+})();;(function () {
     "use strict";
     angular.module('battleShip')
-        .controller('StartController', function () {
-
-    });
+        .controller('StartController', [ function () {
+    }]);
 
 })();

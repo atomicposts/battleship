@@ -6,28 +6,11 @@
     <div class="col-sm-5">
         <fieldset>
             <legend>Ships</legend>
-            <div class="radio">
+
+            <div class="radio" ng-repeat="ship in vmS.ships track by $index">
                 <label>
-                    <input type="radio" name="optionsRadios" id="optionsShip1" value="option1" checked>
-                    <i class="glyphicon glyphicon-stop"></i>
-                    <i class="glyphicon glyphicon-stop"></i>
-                    <i class="glyphicon glyphicon-stop"></i>
-                    <i class="glyphicon glyphicon-stop"></i>
-                </label>
-            </div>
-            <div class="radio">
-                <label>
-                    <input type="radio" name="optionsRadios" id="optionsShip2" value="option2">
-                    <i class="glyphicon glyphicon-stop"></i>
-                    <i class="glyphicon glyphicon-stop"></i>
-                    <i class="glyphicon glyphicon-stop"></i>
-                </label>
-            </div>
-            <div class="radio disabled">
-                <label>
-                    <input type="radio" name="optionsRadios" id="optionsShip3" value="option3" disabled>
-                    <i class="glyphicon glyphicon-stop"></i>
-                    <i class="glyphicon glyphicon-stop"></i>
+                    <input ng-click="vmS.selectShip(ship)" type="radio" name="optionsRadios" id="optionsShip{{$index}}" value="{{$index}}">
+                     Barco de {{ ship.length }} celdas
                 </label>
             </div>
         </fieldset>
