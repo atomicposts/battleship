@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('battleShip')
+    angular.module('bt-setup-module')
         .service('SetupTableCheckService', [ function() {
 
             var self = this;
@@ -35,23 +35,25 @@
                 var xMaxLimit = ((column + shipLength) === self.width) ? self.width - 1 : column + shipLength + 1;
 
                 for ( var i = xMinLimit; i < xMaxLimit; i++) {
-                    if (table[i][row].value !== 0) {
+                    if (table[row][i].value !== 0) {
                         return false;
                     }
 
-                    if (row > 0 && (table[i][row -1].value !== 0)) {
+                    if (row > 0 && (table[row - 1][i].value !== 0)) {
                         return false;
                     }
 
-                    if (row < self.height - 1 && (table[i][row + 1].value !== 0)) {
+                    if (row < self.height - 1 && (table[row + 1][i].value !== 0)) {
                         return false;
                     }
                 }
+
+                return true;
             }
 
             function checkShipVertical(table, row, column, shipLength) {
 
-                if ((row + shipLength) > self.width) {
+                if ((row + shipLength) > self.height) {
                     return false;
                 }
 
@@ -59,18 +61,20 @@
                 var yMaxLimit = ((row + shipLength) === self.height) ? self.height - 1 : row + shipLength + 1;
 
                 for ( var i = yMinLimit; i < yMaxLimit; i++) {
-                    if (table[column][i].value !== 0) {
+                    if (table[i][column].value !== 0) {
                         return false;
                     }
 
-                    if (column > 0 && (table[column - 1][i].value !== 0)) {
+                    if (column > 0 && (table[i][column - 1].value !== 0)) {
                         return false;
                     }
 
-                    if (column < self.width - 2 && (table[column + 1][i].value !== 0)) {
+                    if (column < self.width - 1 && (table[i][column + 1].value !== 0)) {
                         return false;
                     }
                 }
+
+                return true;
             }
 
 

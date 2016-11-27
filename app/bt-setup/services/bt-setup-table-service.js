@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('battleShip')
+    angular.module('bt-setup-module')
         .service('SetupTableService', ['$q', 'SetupTableGetService', 'SetupTableTransformer', function($q, SetupTableGetService, SetupTableTransformer) {
 
             var self= this;

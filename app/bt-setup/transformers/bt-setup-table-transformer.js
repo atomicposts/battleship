@@ -2,7 +2,7 @@
     'use strict';
 
     angular
-        .module('battleShip')
+        .module('bt-setup-module')
         .factory('SetupTableTransformer', [function () {
             var service = {
                 transform : transformResult

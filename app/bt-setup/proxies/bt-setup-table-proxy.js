@@ -2,7 +2,7 @@
     'use strict';
 
     angular
-        .module('battleShip')
+        .module('bt-setup-module')
         .factory('SetupTableProxy', ['$http', '$q', function ($http, $q) {
             var service = {
                 getTable: getTable
@@ -18,7 +18,7 @@
                     }
                 };
 
-                return $http.get('/table.json', config)
+                return $http.get('http://localhost:3000/board/rows/' + width + '/columns/' + height, config)
                     .then(getTableSuccess, getTableFailed);
 
                 function getTableSuccess(response) {

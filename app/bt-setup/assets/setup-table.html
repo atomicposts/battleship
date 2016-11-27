@@ -1,9 +1,7 @@
-
-<table class="table table-bordered">
+<table class="table-sea table table-bordered">
   <tbody>
     <tr class="row-{{ $index }}" ng-repeat="row in ctrl.setupTable track by $index">
-         <td class="col-{{ $index }} {{cell.class}}" ng-repeat="cell in row track by $index">
-             {{ cell.value }}
+         <td ng-mouseleave="ctrl.resetCellClass($parent.$index, $index)" ng-mouseenter="ctrl.checkSetupShip($parent.$index, $index)" class="{{cell.class}}" ng-repeat="cell in row track by $index">
          </td>
      </tr>
   </tbody>

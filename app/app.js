@@ -1,20 +1,19 @@
 (function () {
     "use strict";
 
-    angular.module('battleShip', ['ngRoute'])
+    angular.module('battleShip', ['ngRoute', 'bt-setup-module'])
         .config(['$routeProvider', function ($routeProvider) {
             $routeProvider
                 .when('/start', {
-                    templateUrl: 'app/start.html',
-                    controller: 'StartController'
+                    templateUrl: 'app/templates/start.html'
                 })
                 .when('/setup', {
-                    templateUrl: 'app/setup.html',
+                    templateUrl: 'app/templates/setup.html',
                     controller: 'SetupController',
                     controllerAs: 'vmS',
                     resolve: {
                         table : ['SetupTableService', function (SetupTableService) {
-                            return SetupTableService.getInitialTable();
+                            return SetupTableService.getInitialTable(10, 10);
                         }]
                     }
                 })

@@ -1,0 +1,16 @@
+table {
+    width: 90%;
+}
+table td {
+    width: 10px;
+    position: relative;
+}
+td:after {
+    content: '';
+    display: block;
+    margin-top: 100%;
+}
+
+table.table-sea td.water{
+    background-color: #a8f0f7;
+}

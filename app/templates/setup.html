@@ -10,7 +10,7 @@
             <div class="radio" ng-repeat="ship in vmS.ships track by $index">
                 <label>
                     <input ng-click="vmS.selectShip(ship)" type="radio" name="optionsRadios" id="optionsShip{{$index}}" value="{{$index}}">
-                     Barco de {{ ship.length }} celdas
+                     {{ ship.length }} cell ship
                 </label>
             </div>
         </fieldset>

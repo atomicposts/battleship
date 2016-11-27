@@ -2,7 +2,7 @@
     'use strict';
 
     angular
-        .module('battleShip')
+        .module('bt-setup-module')
         .service('SetupTableGetService', [ 'SetupTableProxy', '$q', function(SetupTableProxy, $q) {
 
             var self = this;

@@ -43057,20 +43057,19 @@ function ngViewFillContentFactory($compile, $controller, $route) {
 ;(function () {
     "use strict";
 
-    angular.module('battleShip', ['ngRoute'])
+    angular.module('battleShip', ['ngRoute', 'bt-setup-module'])
         .config(['$routeProvider', function ($routeProvider) {
             $routeProvider
                 .when('/start', {
-                    templateUrl: 'app/start.html',
-                    controller: 'StartController'
+                    templateUrl: 'app/templates/start.html'
                 })
                 .when('/setup', {
-                    templateUrl: 'app/setup.html',
+                    templateUrl: 'app/templates/setup.html',
                     controller: 'SetupController',
                     controllerAs: 'vmS',
                     resolve: {
                         table : ['SetupTableService', function (SetupTableService) {
-                            return SetupTableService.getInitialTable();
+                            return SetupTableService.getInitialTable(10, 10);
                         }]
                     }
                 })
@@ -43080,19 +43079,24 @@ function ngViewFillContentFactory($compile, $controller, $route) {
         }]);
 }) ();
 
-;(function () {
-    angular.module('battleShip')
+;(function() {
+    'use strict';
+    //Module to store common controllers in the view
+    angular.module('bt-setup-module', []);
+})();;(function () {
+    angular.module('bt-setup-module')
         .controller('SetupControllerDirective', [ '$rootScope', 'SetupTableService', 'SetupTableCheckService' , function ($rootScope, SetupTableService, SetupTableCheckService) {
+
             var vm = this;
 
             vm.setupTable = [];
             vm.selectedShip = null;
             vm.setupTable  = SetupTableService.getTable();
 
-            vm.selectedShip = null;
             vm.verticalOrientation = 'false';
 
             vm.checkSetupShip = checkSetupShip;
+            vm.resetCellClass = resetCellClass;
 
             // Event capture for ship selected
             $rootScope.$on('SELECT_SHIP', function(event, ship) {
@@ -43100,56 +43104,27 @@ function ngViewFillContentFactory($compile, $controller, $route) {
             });
 
             function checkSetupShip(row, column) {
-                return SetupTableCheckService.checkShip(vm.setupTable, row, column, vm.selectedShip.length, vm.verticalOrientation);
+                if (vm.selectedShip !== null) {
+                    var check = SetupTableCheckService.checkShip(vm.setupTable, row, column, vm.selectedShip.length, vm.verticalOrientation);
+
+                    vm.setupTable[row][column].class += (check === false) ? ' danger' : ' success';
+                }
+            }
+
+            function resetCellClass(row, column) {
+                if (vm.selectedShip !== null) {
+                    vm.setupTable[row][column].class = vm.setupTable[row][column].class.substr(0, vm.setupTable[row][column].class.indexOf(' '));
+                }
             }
 
         }]);
 
-})();
-
-;(function(){
-    angular.module('battleShip')
-        .controller('SetupController', ['table', '$rootScope', function (table, $rootScope) {
-            var vm = this;
-
-            vm.ships = [{
-                id: 1,
-                length: 4,
-                status: 'init'
-            },{
-                id: 2,
-                length: 3,
-                status: 'init'
-            },{
-                id: 3,
-                length: 2,
-                status: 'init'
-            }
-            ];
-
-            vm.horizontal = true;
-
-            //Event
-            vm.selectShip = function (ship) {
-                vm.shipSelected = ship;
-                $rootScope.$broadcast('SELECT_SHIP', ship);
-            };
-
-            initialize();
-
-            function initialize() {
-                vm.shipSelected = vm.ships[0];
-                $rootScope.$broadcast('SELECT_SHIP', vm.shipSelected);
-            }
-
-
-        }]);
 })();
 
 ;(function () {
     "use strict";
 
-    angular.module('battleShip')
+    angular.module('bt-setup-module')
         .directive('setupTableDirective', function ($compile, $timeout, SetupTableService) {
             return {
                 restrict: 'E',
@@ -43160,51 +43135,6 @@ function ngViewFillContentFactory($compile, $controller, $route) {
                 scope: {
                     width: '@',
                     height: '@'
-                },
-                link: function (scope, elem, attrs, ctrl) {
-
-                    $timeout(function () { //We use timeout to run after a digest
-                        var cells = elem.find('td');
-
-                        cells.bind("click", function () {      // Binding
-                            if (ctrl.selectedShip) {
-                                var column = $(this).parent().children().index(this);
-                                var row = $(this).parent().parent().children().index(this.parentNode);
-                                if (ctrl.checkSetupShip(row, column) === false) {
-                                    alert("Imposible");
-                                } else {
-                                    alert("Posible");
-                                }
-                            }
-                        });
-
-                        cells.bind("mouseover", function () {
-                            if (ctrl.selectedShip) {
-                                elem.find('tr').removeClass('danger');
-                                elem.find('tr').removeClass('success');
-                                elem.find('td').removeClass('danger');
-                                elem.find('td').removeClass('success');
-                                var columnNumber = $(this).parent().children().index(this);
-                                var rowNumber = $(this).parent().parent().children().index(this.parentNode);
-                                var row = $(this).parent();
-
-                                if (ctrl.checkSetupShip(rowNumber, columnNumber) === false) {
-                                    if (ctrl.verticalOrientation === 'false') {
-                                        $(elem).find('.row-' + rowNumber).addClass('danger');
-                                    } else {
-                                        $(elem).find('.col-' + columnNumber).addClass('danger');
-                                    }
-                                } else {
-                                    if (ctrl.verticalOrientation === 'false') {
-                                        $(elem).find('.row-' + rowNumber).addClass('success');
-                                    } else {
-                                        $(elem).find('.col-' + columnNumber).addClass('success');
-                                    }
-                                }
-                            }
-                        });
-
-                    });
                 }
             };
         });
@@ -43213,7 +43143,7 @@ function ngViewFillContentFactory($compile, $controller, $route) {
     'use strict';
 
     angular
-        .module('battleShip')
+        .module('bt-setup-module')
         .factory('SetupTableProxy', ['$http', '$q', function ($http, $q) {
             var service = {
                 getTable: getTable
@@ -43229,7 +43159,7 @@ function ngViewFillContentFactory($compile, $controller, $route) {
                     }
                 };
 
-                return $http.get('/table.json', config)
+                return $http.get('http://localhost:3000/board/rows/' + width + '/columns/' + height, config)
                     .then(getTableSuccess, getTableFailed);
 
                 function getTableSuccess(response) {
@@ -43248,7 +43178,7 @@ function ngViewFillContentFactory($compile, $controller, $route) {
 ;(function () {
     'use strict';
 
-    angular.module('battleShip')
+    angular.module('bt-setup-module')
         .service('SetupTableCheckService', [ function() {
 
             var self = this;
@@ -43282,23 +43212,25 @@ function ngViewFillContentFactory($compile, $controller, $route) {
                 var xMaxLimit = ((column + shipLength) === self.width) ? self.width - 1 : column + shipLength + 1;
 
                 for ( var i = xMinLimit; i < xMaxLimit; i++) {
-                    if (table[i][row].value !== 0) {
+                    if (table[row][i].value !== 0) {
                         return false;
                     }
 
-                    if (row > 0 && (table[i][row -1].value !== 0)) {
+                    if (row > 0 && (table[row - 1][i].value !== 0)) {
                         return false;
                     }
 
-                    if (row < self.height - 1 && (table[i][row + 1].value !== 0)) {
+                    if (row < self.height - 1 && (table[row + 1][i].value !== 0)) {
                         return false;
                     }
                 }
+
+                return true;
             }
 
             function checkShipVertical(table, row, column, shipLength) {
 
-                if ((row + shipLength) > self.width) {
+                if ((row + shipLength) > self.height) {
                     return false;
                 }
 
@@ -43306,18 +43238,20 @@ function ngViewFillContentFactory($compile, $controller, $route) {
                 var yMaxLimit = ((row + shipLength) === self.height) ? self.height - 1 : row + shipLength + 1;
 
                 for ( var i = yMinLimit; i < yMaxLimit; i++) {
-                    if (table[column][i].value !== 0) {
+                    if (table[i][column].value !== 0) {
                         return false;
                     }
 
-                    if (column > 0 && (table[column - 1][i].value !== 0)) {
+                    if (column > 0 && (table[i][column - 1].value !== 0)) {
                         return false;
                     }
 
-                    if (column < self.width - 2 && (table[column + 1][i].value !== 0)) {
+                    if (column < self.width - 1 && (table[i][column + 1].value !== 0)) {
                         return false;
                     }
                 }
+
+                return true;
             }
 
 
@@ -43326,7 +43260,7 @@ function ngViewFillContentFactory($compile, $controller, $route) {
     'use strict';
 
     angular
-        .module('battleShip')
+        .module('bt-setup-module')
         .service('SetupTableGetService', [ 'SetupTableProxy', '$q', function(SetupTableProxy, $q) {
 
             var self = this;
@@ -43355,7 +43289,7 @@ function ngViewFillContentFactory($compile, $controller, $route) {
 })();;(function () {
     'use strict';
 
-    angular.module('battleShip')
+    angular.module('bt-setup-module')
         .service('SetupTableService', ['$q', 'SetupTableGetService', 'SetupTableTransformer', function($q, SetupTableGetService, SetupTableTransformer) {
 
             var self= this;
@@ -43389,7 +43323,7 @@ function ngViewFillContentFactory($compile, $controller, $route) {
     'use strict';
 
     angular
-        .module('battleShip')
+        .module('bt-setup-module')
         .factory('SetupTableTransformer', [function () {
             var service = {
                 transform : transformResult
@@ -43430,10 +43364,41 @@ function ngViewFillContentFactory($compile, $controller, $route) {
             }
 
         }]);
-})();;(function () {
-    "use strict";
+})();;(function(){
     angular.module('battleShip')
-        .controller('StartController', [ function () {
-    }]);
+        .controller('SetupController', ['table', '$rootScope', function (table, $rootScope) {
+            var vm = this;
 
+            vm.ships = [{
+                id: 1,
+                length: 4,
+                status: 'init'
+            },{
+                id: 2,
+                length: 3,
+                status: 'init'
+            },{
+                id: 3,
+                length: 2,
+                status: 'init'
+            }
+            ];
+
+            vm.horizontal = true;
+
+            //Event
+            vm.selectShip = function (ship) {
+                vm.shipSelected = ship;
+                $rootScope.$broadcast('SELECT_SHIP', ship);
+            };
+
+            initialize();
+
+            function initialize() {
+                vm.shipSelected = vm.ships[0];
+                $rootScope.$broadcast('SELECT_SHIP', vm.shipSelected);
+            }
+
+        }]);
 })();
+
