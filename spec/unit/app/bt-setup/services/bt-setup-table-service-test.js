@@ -1,16 +1,20 @@
 describe('Setup Table Service test', function () {
 
     var setupTableService;
-    var mockResponse = [[0, 0], [0, 0]];
 
     var fakeSetupTableGetService = {
         getTable: jasmine.createSpy()
+    };
+
+    var fakeSetupTableTransformer = {
+        transform: jasmine.createSpy()
     };
 
     beforeEach(module('battleShip'));
 
     beforeEach(module(function ($provide) {
         $provide.value('SetupTableGetService', fakeSetupTableGetService);
+        $provide.value('SetupTableTransformer', fakeSetupTableTransformer);
     }));
 
     beforeEach(inject(function (SetupTableService) {
@@ -18,25 +22,25 @@ describe('Setup Table Service test', function () {
     }));
 
     describe('when SetupTableGetTable resolves the promise', function () {
-        var resultTransformed = [
-            [{class: "water", value: 0 }, {class: "water", value: 0 }],
-            [{class: "water", value: 0 }, {class: "water", value: 0 }]
-        ];
 
         beforeEach(inject(function ($q) {
             fakeSetupTableGetService.getTable = jasmine.createSpy('getTable').and.callFake(function () {
                 var deferred = $q.defer ();
                 var response = deferred.promise;
 
-                deferred.resolve(mockResponse);
+                deferred.resolve('demo');
                 return response;
+            });
+
+            fakeSetupTableTransformer.transform = jasmine.createSpy('transform').and.callFake(function () {
+                return 'ok';
             });
         }));
 
         it('getInitialTable should be called and result should be returned transformed', function (done) {
             inject(function($rootScope) {
                 setupTableService.getInitialTable(2, 3).then(function (responseData) {
-                    expect(responseData).toEqual(resultTransformed);
+                    expect(responseData).toEqual('ok');
                     done();
                 });
                 $rootScope.$digest(); // To make a digest cycle
@@ -46,9 +50,8 @@ describe('Setup Table Service test', function () {
         it('getTable should be called, and result should be returned', function (done) {
             inject(function($rootScope) {
                 setupTableService.getInitialTable(2, 3).then(function (responseData) {
-                    expect(responseData).toEqual(resultTransformed);
                     var result = setupTableService.getTable();
-                    expect(result).toEqual(resultTransformed);
+                    expect(result).toEqual('ok');
                     done();
                 });
                 $rootScope.$digest(); // To make a digest cycle
