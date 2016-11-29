@@ -3,10 +3,7 @@ describe('Setup Table Directive test', function () {
     beforeEach(module('battleShip'));
     beforeEach(module('templates'));
 
-    var mockTable = [
-        [{ value: 0, class: 'water' }, { value: 0, class: 'water' }],
-        [{ value: 0, class: 'water' }, { value: 0, class: 'water' }]
-    ];
+
     var fakeSetupTableService = {
         getTable: jasmine.createSpy()
     };
@@ -16,9 +13,13 @@ describe('Setup Table Directive test', function () {
     }));
 
     describe('when Setup Table Service return 2 x 2 table', function () {
-        var element, scope, controller;
-        beforeEach(inject(function($rootScope, $compile, $controller) {
-            controller = $controller;
+        var element, scope;
+        beforeEach(inject(function($rootScope, $compile) {
+            var mockTable = [
+                [{ value: 0, class: 'water' }, { value: 0, class: 'water' }],
+                [{ value: 0, class: 'water' }, { value: 0, class: 'water' }]
+            ];
+
             fakeSetupTableService.getTable = jasmine.createSpy('getTable').and.callFake(function () {
                 return mockTable;
             });
@@ -27,9 +28,6 @@ describe('Setup Table Directive test', function () {
             element = angular.element('<setup-table-directive width="2" height="2"></setup-table-directive>');
             $compile(element)(scope);
             scope.$digest();
-
-            controller = element.controller('setupTableDirective');
-
         }));
 
         it('should show table with 4 cells (td)', function () {
@@ -41,15 +39,19 @@ describe('Setup Table Directive test', function () {
 
     describe('when Setup Table Service return 2 x 2 table and we mouseover selecting a ship with 2 cells of length', function () {
         var element, scope, controller;
-        beforeEach(inject(function($rootScope, $compile, $controller) {
-            controller = $controller;
+        beforeEach(inject(function($rootScope, $compile) {
+            var mockTable = [
+                [{ value: 0, class: 'water' }, { value: 0, class: 'water' }],
+                [{ value: 0, class: 'water' }, { value: 0, class: 'water' }]
+            ];
+
             fakeSetupTableService.getTable = jasmine.createSpy('getTable').and.callFake(function () {
                 return mockTable;
             });
 
             scope = $rootScope.$new();
-            element = angular.element('<setup-table-directive width="2" height="2"></setup-table-directive>');
-            $compile(element)(scope);
+            element = '<setup-table-directive width="2" height="2"></setup-table-directive>';
+            element = $compile(element)(scope);
             scope.$digest();
 
             controller = element.controller('setupTableDirective');
@@ -58,7 +60,6 @@ describe('Setup Table Directive test', function () {
                 length: 2,
                 status: 'init'
             };
-
         }));
 
         it('first td cell after mouseover should have success css class', function () {
@@ -78,6 +79,8 @@ describe('Setup Table Directive test', function () {
         it('td cell after mouseleave should have water css class', function () {
             var tds = element.find('td');
             var td = angular.element(tds[0]);
+
+            td.triggerHandler('mouseover');
             td.triggerHandler('mouseleave');
             expect(td.hasClass('water')).toBeTruthy();
             expect(td.hasClass('success')).toBeFalsy();
